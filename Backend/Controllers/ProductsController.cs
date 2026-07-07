@@ -18,7 +18,11 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] string? search)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] string? search, 
+        [FromQuery] string? category, 
+        [FromQuery] int page = 1, 
+        [FromQuery] int pageSize = 8)
     {
         var query = _context.Products.AsQueryable();
 
@@ -28,8 +32,54 @@ public class ProductsController : ControllerBase
             query = query.Where(product => product.Name.ToLower().Contains(normalizedSearch));
         }
 
-        var products = await query.ToListAsync();
-        return Ok(products);
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            query = query.Where(product => product.Category == category);
+        }
+
+        int totalItems = await query.CountAsync();
+        var products = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+        return Ok(new
+        {
+            statusCode = 200,
+            message = "Success",
+            data = products,
+            pagination = new
+            {
+                currentPage = page,
+                pageSize = pageSize,
+                totalItems = totalItems,
+                totalPages = totalPages
+            }
+        });
+    }
+
+    [HttpGet("categories")]
+    public async Task<IActionResult> GetCategories()
+    {
+        var categories = await _context.Products
+            .Where(p => p.Category != null && p.Category != "")
+            .Select(p => p.Category)
+            .Distinct()
+            .ToListAsync();
+        return Ok(categories);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var product = await _context.Products.FindAsync(id);
+        if (product == null)
+        {
+            return NotFound(new { message = "Product not found" });
+        }
+        return Ok(product);
     }
 
     [HttpPost]

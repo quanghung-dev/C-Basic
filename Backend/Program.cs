@@ -1,6 +1,7 @@
 using Npgsql;
 using Microsoft.EntityFrameworkCore;
 using ProductManagementApi.Data;
+using ProductManagementApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -24,6 +25,21 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 var app = builder.Build();
 
 app.UseCors("AllowAll");
+
+// Seed Database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        DbInitializer.Initialize(context);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"An error occurred while seeding the database: {ex.Message}");
+    }
+}
 
 if (app.Environment.IsDevelopment())
 {

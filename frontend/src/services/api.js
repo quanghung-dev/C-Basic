@@ -1,10 +1,34 @@
 const API_BASE_URL = 'http://192.168.1.40:5241/api/products'
 
-export const getProducts = async (search = '') => {
-  const url = search ? `${API_BASE_URL}?search=${encodeURIComponent(search)}` : API_BASE_URL
+export const getProducts = async (search = '', category = '', page = 1, pageSize = 8) => {
+  const params = new URLSearchParams()
+  if (search) params.append('search', search)
+  if (category) params.append('category', category)
+  params.append('page', page)
+  params.append('pageSize', pageSize)
+  
+  const queryString = params.toString()
+  const url = `${API_BASE_URL}?${queryString}`
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`)
+  }
+  return response.json()
+}
+
+export const getCategories = async () => {
+  const response = await fetch(`${API_BASE_URL}/categories`)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch categories: ${response.status} ${response.statusText}`)
+  }
+  return response.json()
+}
+
+export const getProductById = async (id) => {
+  const response = await fetch(`${API_BASE_URL}/${id}`)
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.message || `Failed to fetch product: ${response.status}`)
   }
   return response.json()
 }

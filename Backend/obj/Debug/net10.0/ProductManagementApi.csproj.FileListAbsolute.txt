@@ -242,3 +242,4 @@ D:\ProductManagementApi\Backend\obj\Debug\net10.0\refint\ProductManagementApi.dl
 D:\ProductManagementApi\Backend\obj\Debug\net10.0\ProductManagementApi.pdb
 D:\ProductManagementApi\Backend\obj\Debug\net10.0\ProductManagementApi.genruntimeconfig.cache
 D:\ProductManagementApi\Backend\obj\Debug\net10.0\ref\ProductManagementApi.dll
+D:\ProductManagementApi\Backend\obj\Debug\net10.0\ProductManagementApi.sourcelink.json

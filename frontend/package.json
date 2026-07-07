@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "antd": "^6.5.0",
     "lucide-react": "^1.23.0",
     "next": "latest",
     "react": "^19.2.7",
