@@ -36,7 +36,6 @@ export default function CreateProductPage() {
         stock: Number(values.stock),
       });
       message.success("Tạo sản phẩm thành công!");
-      sessionStorage.setItem("should_refresh_products", "true");
       router.push("/");
     } catch (error: any) {
       console.error(error);
@@ -104,7 +103,10 @@ export default function CreateProductPage() {
         </Form.Item>
 
         <div className="flex gap-4 mt-6">
-          <AppButton type="default" htmlType="button" onClick={() => router.back()} disabled={loading}>
+          <AppButton type="default" htmlType="button" onClick={() => {
+            sessionStorage.setItem("use_products_cache", "true");
+            router.back();
+          }} disabled={loading}>
             Hủy bỏ
           </AppButton>
           <AppButton type="primary" htmlType="submit" loading={loading}>

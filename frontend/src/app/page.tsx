@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Input from "../components/AppInput"
+import AppInput from "../components/AppInput"
 import AppDropBox from "../components/AppDropBox"
 import AppButton from "@/components/AppButton";
 import AppTable from "@/components/AppTable";
-import { Tag, Space, message, Modal } from "antd";
+import { Tag, Space, message, Modal, Input } from "antd";
 import { getProducts, getCategories, deleteProduct } from "@/services/api";
 
 interface ProductType {
@@ -27,14 +27,38 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalItems, setTotalItems] = useState<number>(0);
 
-  const loadProductsData = async (search = "", category = "", page = currentPage) => {
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [minStock, setMinStock] = useState<string>("");
+  const [maxStock, setMaxStock] = useState<string>("");
+
+  const loadProductsData = async (
+    search = searchText,
+    category = selectedCategory || "",
+    page = currentPage,
+    minP = minPrice,
+    maxP = maxPrice,
+    minS = minStock,
+    maxS = maxStock
+  ) => {
     try {
       setLoading(true);
-      const response = await getProducts(search, category, page, 8);
+      const response = await getProducts(search, category, page, 8, minP, maxP, minS, maxS);
       setProducts(response.data);
       setTotalItems(response.pagination.totalItems);
-      sessionStorage.setItem("cached_products", JSON.stringify(response.data));
-      sessionStorage.setItem("cached_total_items", String(response.pagination.totalItems));
+
+      const cacheData = {
+        products: response.data,
+        totalItems: response.pagination.totalItems,
+        currentPage: page,
+        searchText: search,
+        selectedCategory: category,
+        minPrice: minP,
+        maxPrice: maxP,
+        minStock: minS,
+        maxStock: maxS
+      };
+      sessionStorage.setItem("products_cache", JSON.stringify(cacheData));
     } catch (error) {
       console.error("Lỗi:", error);
       message.error("Không thể tải danh sách sản phẩm!");
@@ -53,37 +77,44 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const shouldRefresh = sessionStorage.getItem("should_refresh_products") === "true";
-    const cachedData = sessionStorage.getItem("cached_products");
-    const cachedTotal = sessionStorage.getItem("cached_total_items");
+    const useCache = sessionStorage.getItem("use_products_cache") === "true";
+    sessionStorage.removeItem("use_products_cache");
 
-    const savedPage = sessionStorage.getItem("current_page");
-    const targetPage = savedPage ? Number(savedPage) : 1;
-    if (savedPage) {
-      setCurrentPage(targetPage);
+    if (useCache) {
+      const cached = sessionStorage.getItem("products_cache");
+      if (cached) {
+        try {
+          const data = JSON.parse(cached);
+          setProducts(data.products || []);
+          setTotalItems(data.totalItems || 0);
+          setCurrentPage(data.currentPage || 1);
+          setSearchText(data.searchText || "");
+          setSelectedCategory(data.selectedCategory);
+          setMinPrice(data.minPrice || "");
+          setMaxPrice(data.maxPrice || "");
+          setMinStock(data.minStock || "");
+          setMaxStock(data.maxStock || "");
+
+          loadCategoriesData();
+          return;
+        } catch (e) {
+          console.error("Lỗi đọc cache:", e);
+        }
+      }
     }
 
-    if (shouldRefresh || !cachedData || !cachedTotal) {
-      loadProductsData(searchText, selectedCategory || "", targetPage);
-      sessionStorage.removeItem("should_refresh_products");
-    } else {
-      setProducts(JSON.parse(cachedData));
-      setTotalItems(Number(cachedTotal));
-    }
-
+    loadProductsData(searchText, selectedCategory || "", currentPage);
     loadCategoriesData();
   }, []);
 
   const handleSearch = () => {
     setCurrentPage(1);
-    sessionStorage.setItem("current_page", "1");
     loadProductsData(searchText, selectedCategory || "", 1);
   };
 
   const handleTableChange = (paginationInfo: any) => {
     if (paginationInfo.current) {
       setCurrentPage(paginationInfo.current);
-      sessionStorage.setItem("current_page", String(paginationInfo.current));
       loadProductsData(searchText, selectedCategory || "", paginationInfo.current);
     }
   };
@@ -164,26 +195,76 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col p-4">
       <div className="grid grid-cols-4 gap-10 p-2">
-        <Input 
-          label="Name Product" 
-          placeholder="Nhập tên để tìm kiếm" 
+        <AppInput
+          label="Name Product"
+          placeholder="Nhập tên để tìm kiếm"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           onPressEnter={handleSearch}
         />
-        <AppDropBox 
-          label="Categories" 
-          buttonText={selectedCategory || "Chọn danh mục"} 
-          menu={{ 
+        <AppDropBox
+          label="Categories"
+          buttonText={selectedCategory || "Chọn danh mục"}
+          menu={{
             items: [
               { key: "all", label: "Tất cả danh mục" },
               ...categoryItems
             ],
             onClick: ({ key }) => setSelectedCategory(key === "all" ? undefined : key)
-          }} 
+          }}
         />
-        <Input label="Price" placeholder="Nhập giá" />
-        <Input label="Stock" placeholder="Nhập số lượng" />
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>
+            Khoảng giá (đ)
+          </label>
+          <div className="flex gap-2 items-center">
+            <Input
+              placeholder="Từ"
+              size="large"
+              type="number"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              onPressEnter={handleSearch}
+              allowClear
+            />
+            <span style={{ color: "#d9d9d9" }}>-</span>
+            <Input
+              placeholder="Đến"
+              size="large"
+              type="number"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              onPressEnter={handleSearch}
+              allowClear
+            />
+          </div>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>
+            Khoảng số lượng
+          </label>
+          <div className="flex gap-2 items-center">
+            <Input
+              placeholder="Từ"
+              size="large"
+              type="number"
+              value={minStock}
+              onChange={(e) => setMinStock(e.target.value)}
+              onPressEnter={handleSearch}
+              allowClear
+            />
+            <span style={{ color: "#d9d9d9" }}>-</span>
+            <Input
+              placeholder="Đến"
+              size="large"
+              type="number"
+              value={maxStock}
+              onChange={(e) => setMaxStock(e.target.value)}
+              onPressEnter={handleSearch}
+              allowClear
+            />
+          </div>
+        </div>
       </div>
       <div className="flex gap-4 p-2">
         <AppButton onClick={handleSearch}>Search</AppButton>

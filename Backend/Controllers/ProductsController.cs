@@ -21,6 +21,10 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> GetAll(
         [FromQuery] string? search, 
         [FromQuery] string? category, 
+        [FromQuery] decimal? minPrice,
+        [FromQuery] decimal? maxPrice,
+        [FromQuery] int? minStock,
+        [FromQuery] int? maxStock,
         [FromQuery] int page = 1, 
         [FromQuery] int pageSize = 8)
     {
@@ -35,6 +39,26 @@ public class ProductsController : ControllerBase
         if (!string.IsNullOrWhiteSpace(category))
         {
             query = query.Where(product => product.Category == category);
+        }
+
+        if (minPrice.HasValue)
+        {
+            query = query.Where(product => product.Price >= minPrice.Value);
+        }
+
+        if (maxPrice.HasValue)
+        {
+            query = query.Where(product => product.Price <= maxPrice.Value);
+        }
+
+        if (minStock.HasValue)
+        {
+            query = query.Where(product => product.Stock >= minStock.Value);
+        }
+
+        if (maxStock.HasValue)
+        {
+            query = query.Where(product => product.Stock <= maxStock.Value);
         }
 
         int totalItems = await query.CountAsync();

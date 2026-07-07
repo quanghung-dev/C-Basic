@@ -1,11 +1,15 @@
 const API_BASE_URL = 'http://192.168.1.40:5241/api/products'
 
-export const getProducts = async (search = '', category = '', page = 1, pageSize = 8) => {
+export const getProducts = async (search = '', category = '', page = 1, pageSize = 8, minPrice = '', maxPrice = '', minStock = '', maxStock = '') => {
   const params = new URLSearchParams()
   if (search) params.append('search', search)
   if (category) params.append('category', category)
   params.append('page', page)
   params.append('pageSize', pageSize)
+  if (minPrice !== undefined && minPrice !== null && minPrice !== '') params.append('minPrice', minPrice)
+  if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') params.append('maxPrice', maxPrice)
+  if (minStock !== undefined && minStock !== null && minStock !== '') params.append('minStock', minStock)
+  if (maxStock !== undefined && maxStock !== null && maxStock !== '') params.append('maxStock', maxStock)
   
   const queryString = params.toString()
   const url = `${API_BASE_URL}?${queryString}`

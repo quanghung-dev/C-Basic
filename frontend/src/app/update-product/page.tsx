@@ -59,7 +59,6 @@ function UpdateProductForm() {
         stock: Number(values.stock)
       });
       message.success("Cập nhật sản phẩm thành công!");
-      sessionStorage.setItem("should_refresh_products", "true");
       router.push("/");
     } catch (error: any) {
       console.error(error);
@@ -130,7 +129,10 @@ function UpdateProductForm() {
           </Form.Item>
 
           <div className="flex gap-4 mt-6">
-            <AppButton type="default" htmlType="button" onClick={() => router.back()} disabled={submitLoading}>
+            <AppButton type="default" htmlType="button" onClick={() => {
+              sessionStorage.setItem("use_products_cache", "true");
+              router.back();
+            }} disabled={submitLoading}>
               Hủy bỏ
             </AppButton>
             <AppButton type="primary" htmlType="submit" loading={submitLoading}>
