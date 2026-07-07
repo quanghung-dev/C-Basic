@@ -1,0 +1,7 @@
+D:\ProductManagementApi\Backend.Tests\bin\Debug\net10.0\.msCoverageSourceRootsMapping_ProductManagementApi.Tests
+D:\ProductManagementApi\Backend.Tests\bin\Debug\net10.0\CoverletSourceRootsMapping_ProductManagementApi.Tests
+D:\ProductManagementApi\Backend.Tests\obj\Debug\net10.0\ProductManagementApi.Tests.csproj.AssemblyReference.cache
+D:\ProductManagementApi\Backend.Tests\obj\Debug\net10.0\ProductManagementApi.Tests.GeneratedMSBuildEditorConfig.editorconfig
+D:\ProductManagementApi\Backend.Tests\obj\Debug\net10.0\ProductManagementApi.Tests.AssemblyInfoInputs.cache
+D:\ProductManagementApi\Backend.Tests\obj\Debug\net10.0\ProductManagementApi.Tests.AssemblyInfo.cs
+D:\ProductManagementApi\Backend.Tests\obj\Debug\net10.0\ProductManagementApi.Tests.csproj.CoreCompileInputs.cache
