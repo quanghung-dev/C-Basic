@@ -10,7 +10,7 @@ export const getProducts = async (search = '', category = '', page = 1, pageSize
   if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') params.append('maxPrice', maxPrice)
   if (minStock !== undefined && minStock !== null && minStock !== '') params.append('minStock', minStock)
   if (maxStock !== undefined && maxStock !== null && maxStock !== '') params.append('maxStock', maxStock)
-  
+
   const queryString = params.toString()
   const url = `${API_BASE_URL}?${queryString}`
   const response = await fetch(url)
@@ -73,3 +73,24 @@ export const deleteProduct = async (id) => {
   }
   return response.json()
 }
+
+let productsCache = null;
+let useProductsCache = false;
+
+export const setProductsCache = (data) => {
+  productsCache = data;
+};
+
+export const getProductsCache = () => {
+  return productsCache;
+};
+
+export const setUseProductsCache = (value) => {
+  useProductsCache = value;
+};
+
+export const getUseProductsCache = () => {
+  const value = useProductsCache;
+  useProductsCache = false;
+  return value;
+};

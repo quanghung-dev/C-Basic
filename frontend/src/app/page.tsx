@@ -7,7 +7,7 @@ import AppDropBox from "../components/AppDropBox"
 import AppButton from "@/components/AppButton";
 import AppTable from "@/components/AppTable";
 import { Tag, Space, message, Modal, Input } from "antd";
-import { getProducts, getCategories, deleteProduct } from "@/services/api";
+import { getProducts, getCategories, deleteProduct, setProductsCache, getProductsCache, getUseProductsCache } from "@/services/api";
 
 interface ProductType {
   id: number;
@@ -58,7 +58,7 @@ export default function Home() {
         minStock: minS,
         maxStock: maxS
       };
-      sessionStorage.setItem("products_cache", JSON.stringify(cacheData));
+      setProductsCache(cacheData);
     } catch (error) {
       console.error("Lỗi:", error);
       message.error("Không thể tải danh sách sản phẩm!");
@@ -77,29 +77,23 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const useCache = sessionStorage.getItem("use_products_cache") === "true";
-    sessionStorage.removeItem("use_products_cache");
+    const useCache = getUseProductsCache();
 
     if (useCache) {
-      const cached = sessionStorage.getItem("products_cache");
-      if (cached) {
-        try {
-          const data = JSON.parse(cached);
-          setProducts(data.products || []);
-          setTotalItems(data.totalItems || 0);
-          setCurrentPage(data.currentPage || 1);
-          setSearchText(data.searchText || "");
-          setSelectedCategory(data.selectedCategory);
-          setMinPrice(data.minPrice || "");
-          setMaxPrice(data.maxPrice || "");
-          setMinStock(data.minStock || "");
-          setMaxStock(data.maxStock || "");
+      const cachedData = getProductsCache();
+      if (cachedData) {
+        setProducts(cachedData.products || []);
+        setTotalItems(cachedData.totalItems || 0);
+        setCurrentPage(cachedData.currentPage || 1);
+        setSearchText(cachedData.searchText || "");
+        setSelectedCategory(cachedData.selectedCategory);
+        setMinPrice(cachedData.minPrice || "");
+        setMaxPrice(cachedData.maxPrice || "");
+        setMinStock(cachedData.minStock || "");
+        setMaxStock(cachedData.maxStock || "");
 
-          loadCategoriesData();
-          return;
-        } catch (e) {
-          console.error("Lỗi đọc cache:", e);
-        }
+        loadCategoriesData();
+        return;
       }
     }
 
