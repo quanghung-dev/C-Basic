@@ -1,4 +1,13 @@
-const API_BASE_URL = 'http://192.168.1.40:5241/api/products'
+const API_ORIGIN = process.env.NEXT_PUBLIC_API_ORIGIN || 'http://192.168.1.40:5241'
+const API_BASE_URL = `${API_ORIGIN}/api/products`
+
+export const getProductListScreenLayout = async () => {
+  const response = await fetch(`${API_ORIGIN}/api/screens/products`)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch screen layout: ${response.status} ${response.statusText}`)
+  }
+  return response.json()
+}
 
 export const getProducts = async (search = '', category = '', page = 1, pageSize = 8, minPrice = '', maxPrice = '', minStock = '', maxStock = '') => {
   const params = new URLSearchParams()

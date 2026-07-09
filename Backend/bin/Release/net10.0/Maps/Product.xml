@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<SmartSqlMap Scope="Product" xmlns="http://SmartSql.net/schemas/SmartSqlMap.xsd">
+  <Statements>
+    <Statement Id="GetAll">
+        SELECT
+            id AS "Id",
+            name AS "Name",
+            price AS "Price",
+            category AS "Category",
+            stock AS "Stock",
+            created_at AS "CreatedAt"
+        FROM products
+        <Where>
+            <IsNotEmpty Property="Search" Prepend="AND">
+                LOWER(name) LIKE @Search
+            </IsNotEmpty>
+            <IsNotEmpty Property="Category" Prepend="AND">
+                category = @Category
+            </IsNotEmpty>
+            <IsNotNull Property="MinPrice" Prepend="AND">
+                price &gt;= @MinPrice
+            </IsNotNull>
+            <IsNotNull Property="MaxPrice" Prepend="AND">
+                price &lt;= @MaxPrice
+            </IsNotNull>
+            <IsNotNull Property="MinStock" Prepend="AND">
+                stock &gt;= @MinStock
+            </IsNotNull>
+            <IsNotNull Property="MaxStock" Prepend="AND">
+                stock &lt;= @MaxStock
+            </IsNotNull>
+        </Where>
+        ORDER BY id DESC
+        LIMIT @Limit OFFSET @Offset;
+    </Statement>
+
+    <Statement Id="GetCount">
+        SELECT COUNT(*) FROM products
+        <Where>
+            <IsNotEmpty Property="Search" Prepend="AND">
+                LOWER(name) LIKE @Search
+            </IsNotEmpty>
+            <IsNotEmpty Property="Category" Prepend="AND">
+                category = @Category
+            </IsNotEmpty>
+            <IsNotNull Property="MinPrice" Prepend="AND">
+                price &gt;= @MinPrice
+            </IsNotNull>
+            <IsNotNull Property="MaxPrice" Prepend="AND">
+                price &lt;= @MaxPrice
+            </IsNotNull>
+            <IsNotNull Property="MinStock" Prepend="AND">
+                stock &gt;= @MinStock
+            </IsNotNull>
+            <IsNotNull Property="MaxStock" Prepend="AND">
+                stock &lt;= @MaxStock
+            </IsNotNull>
+        </Where>
+    </Statement>
+
+    <Statement Id="GetById">
+        SELECT
+            id AS "Id",
+            name AS "Name",
+            price AS "Price",
+            category AS "Category",
+            stock AS "Stock",
+            created_at AS "CreatedAt"
+        FROM products
+        WHERE id = @Id;
+    </Statement>
+
+    <Statement Id="GetCategories">
+        SELECT DISTINCT category FROM products 
+        WHERE category IS NOT NULL AND category != '';
+    </Statement>
+
+    <Statement Id="Create">
+        INSERT INTO products(name, price, category, stock, created_at)
+        VALUES(@Name, @Price, @Category, @Stock, NOW())
+        RETURNING
+            id AS "Id",
+            name AS "Name",
+            price AS "Price",
+            category AS "Category",
+            stock AS "Stock",
+            created_at AS "CreatedAt";
+    </Statement>
+
+    <Statement Id="Update">
+        UPDATE products 
+        <Set>
+            <IsNotNull Property="Name">
+                name = @Name,
+            </IsNotNull>
+            <IsNotNull Property="Price">
+                price = @Price,
+            </IsNotNull>
+            <IsNotNull Property="Category">
+                category = @Category,
+            </IsNotNull>
+            <IsNotNull Property="Stock">
+                stock = @Stock,
+            </IsNotNull>
+        </Set>
+        WHERE id = @Id
+        RETURNING
+            id AS "Id",
+            name AS "Name",
+            price AS "Price",
+            category AS "Category",
+            stock AS "Stock",
+            created_at AS "CreatedAt";
+    </Statement>
+
+    <Statement Id="Delete">
+        DELETE FROM products
+        WHERE id = @Id
+        RETURNING
+            id AS "Id",
+            name AS "Name",
+            price AS "Price",
+            category AS "Category",
+            stock AS "Stock",
+            created_at AS "CreatedAt";
+    </Statement>
+  </Statements>
+</SmartSqlMap>
